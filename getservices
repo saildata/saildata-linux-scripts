@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# Get color coded list of running services
+
+service --status-all | sort | grep '+' --color=always

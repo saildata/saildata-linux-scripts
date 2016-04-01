@@ -6,8 +6,23 @@
 #       to only work in `night' mode...
 
 hour_now=`date +%H`
-kcode=4000
 
+# set default kcode for incremental 2 hour blocks during evening hours
+if [ "$hour_now" -ge 18 ] && [ "$hour_now" -le 20 ]; then
+    kcode=3950
+elif [ "$hour_now" -ge 20 ] && [ "$hour_now" -le 22 ]; then
+    kcode=3800
+elif [ "$hour_now" -ge 20 ] && [ "$hour_now" -le 22 ]; then
+    kcode=3650
+elif [ "$hour_now" -ge 22 ] && [ "$hour_now" -le 24 ]; then
+    kcode=3500
+elif [ "$hour_now" -le 6 ]; then
+    kcode=3300
+else
+    kcode=4000
+fi
+
+# allow user to set kcode from command line
 while getopts k: opt; do
   case $opt in
     k)
@@ -20,14 +35,16 @@ while getopts k: opt; do
   esac
 done
 
-# ignore if xflux is already running
+# restart xflux if needed
 if pidof -x "xflux" >/dev/null; then
-    echo "Err 2: xflux is already running."
-    exit 2
-elif [ "$hour_now" -ge 18 ] || [ "$hour_now" -le 6 ]; then
+    killall xflux
+fi
+
+# start xflux
+if [ "$hour_now" -ge 18 ] || [ "$hour_now" -le 6 ]; then
 	xflux -z "$FLUXZ" -k "$kcode"
-  	echo "Starting xflux in Night mode."
+  	echo -e "Starting xflux in Night mode (k = "$kcode")" >&2
 else
 	xflux -l "$FLUXZ_DAY_LAT" -g "$FLUXZ_DAY_LON" -k "$kcode"
-	echo "Starting xflux in Day mode."
+	echo -e "Starting xflux in Day mode (k = "$kcode")" >&2
 fi

@@ -1,15 +1,10 @@
 #!/bin/bash
-# Get largest files in current path
+# Get largest files in current path/tree
 
-FilesbySize() {   
-    echo "How many files to list? (press ENTER for default = 10)" >&2
-    read NUM
-
-    NUM="${NUM:-10}"   # set default to 10
-
-    echo "Top $(echo "$NUM") items by file size" >&2
-
-    du -hsx * | sort -rh | head -"$NUM"     
+FilesbySize() {
+    echo "${white}Top 10 items by file size${reset}" >&2
+    
+    find . -type f -print0 | xargs -0 du | sort -nr | uniq | head -10 | cut -f2 | xargs -I{} du -sh {} 
 
     echo ""
 }

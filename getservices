@@ -1,5 +1,5 @@
-#!/bin/bash
+#!/usr/bin/bash
 #
-# Get color coded list of running services
+# Get list of running services
 
-service --status-all | sort | grep '+' --color=always
+systemctl --type=service --state=running

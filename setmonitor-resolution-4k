@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Adjust for a 4k second monitor (with primary display off)
 #
@@ -7,7 +7,4 @@
 
 set -e
 
-function main() {
-  nvidia-settings --assign "CurrentMetaMode = DPY-4: nvidia-auto-select @3840x2160 +0+0 {ViewPortIn=3840x2160, ViewPortOut=3840x2160+0+0}" >& /dev/null
-}
-main
+nvidia-settings --assign "CurrentMetaMode = DPY-4: nvidia-auto-select @3840x2160 +0+0 {ViewPortIn=3840x2160, ViewPortOut=3840x2160+0+0}" &>/dev/null

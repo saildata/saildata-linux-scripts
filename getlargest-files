@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Get largest files in current path/tree
 
 FilesbySize() {

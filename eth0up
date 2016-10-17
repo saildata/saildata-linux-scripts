@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Make sure we're not running wifi when ethernet is up (other methods have failed and the radio stays on...)
 # 

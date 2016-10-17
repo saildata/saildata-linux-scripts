@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Start xflux daemon on Linux (crontab)
 # Note: FLUXZ_DAY_LAT, FLUXZ_DAY_LON, and FLUXZ (actual zip code) are in global scope (export from bash_profile).
@@ -29,22 +29,22 @@ while getopts k: opt; do
       kcode="$OPTARG" ;
       ;;
     \?)
-      echo "Err 1: Invalid option: -$OPTARG" >&2
+      echo "Err 1: Invalid option: -$OPTARG" &>/dev/null
       exit 1
       ;;
   esac
 done
 
 # restart xflux if needed
-if pidof -x "xflux" >/dev/null; then
+if pidof -x "xflux" &>/dev/null; then
     killall xflux
 fi
 
 # start xflux
 if [ "$hour_now" -ge 18 ] || [ "$hour_now" -le 6 ]; then
 	xflux -z "$FLUXZ" -k "$kcode"
-  	echo -e "Starting xflux in Night mode (k = "$kcode")" >&2
+  	echo -e "Starting xflux in Night mode (k = "$kcode")" &>/dev/null
 else
 	xflux -l "$FLUXZ_DAY_LAT" -g "$FLUXZ_DAY_LON" -k "$kcode"
-	echo -e "Starting xflux in Day mode (k = "$kcode")" >&2
+	echo -e "Starting xflux in Day mode (k = "$kcode")" &>/dev/null
 fi

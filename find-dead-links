@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Find broken links in the current path
 

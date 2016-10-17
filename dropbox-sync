@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Start dropbox | sync | quit
 # Why? Bc it doesn't need to run 24/7. 
@@ -16,9 +16,9 @@ fi
 
 # wait for sync to finish, then quit
 while true; do
-    if [[ $(dropbox status) = 'Up to date' ]]; then
+    if [ $(dropbox status) = 'Up to date' ]; then
         dropbox stop &>/dev/null && exit 0        
     else
-        sleep 1.5 &
+        sleep 2 &
     fi
 done

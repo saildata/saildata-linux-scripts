@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Remove broken links in the current directory
 # See also: find-dead-links
 

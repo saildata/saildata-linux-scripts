@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/sh
 # Usage:
 #           00-prestart-quickcheck
 #
@@ -8,9 +8,8 @@ kernel_start_time=$(bc <<< "scale=10; $(systemd-analyze | cut -d' ' -f10 | cut -
 userspace_start_time=$(bc <<< "scale=10; $(systemd-analyze | cut -d' ' -f13 | cut -d's' -f1) * 1000")
 totaltime=$(bc <<< "scale=3; (( $kernel_start_time + $userspace_start_time )) / 1000")
 
-function quick_check() {
-  systemctl --failed | test $(grep -c "0 loaded units listed") = 1 && echo -e "\e[38;5;41mSystemctl OK\e[0m" || echo -e "\e[38;5;1mCheck systemctl\e[0m"
+systemctl --failed |\
+       	test $(grep -c "0 loaded units listed") = 1 \
+	&& echo -e "\e[38;5;41mSystemctl OK\e[0m"\
+       	|| echo -e "\e[38;5;1mCheck systemctl\e[0m"
   echo -e "Kernel + boot time: \e[38;5;41m$totaltime seconds\e[0m"
-}
-
-quick_check

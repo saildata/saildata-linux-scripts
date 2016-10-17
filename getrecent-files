@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Get list of most recent files in current path. Useful for "Where did that go? I just saved it..."
 

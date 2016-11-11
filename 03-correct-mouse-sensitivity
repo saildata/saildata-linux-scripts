@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Change 'Device Accel Constant Deceleration'
+# Find device info: xinput (find device); xinput list-inputs n (n=device number)
+set -e
+
+xinput set-prop 10 282 0.60

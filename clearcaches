@@ -1,5 +1,5 @@
 #!/bin/sh
 
-# Clear caches
-# Notes: set to cronjob every 2 hrs.
+# Because Java is real.
+sync; sync; sync;
 sudo sh -c "sync; echo 3 > /proc/sys/vm/drop_caches"

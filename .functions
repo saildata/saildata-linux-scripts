@@ -1,0 +1,226 @@
+#!/bin/bash
+#
+# 1- denotes sourced from https://raw.githubusercontent.com/mathiasbynens/dotfiles/master/.functions (1/31/16)
+# 2- re: 1-  (minor deviations/tweaks may exist)
+
+
+# 1- Simple calculator
+#---------------------
+function calc() {
+    local result="";
+    result="$(printf "scale=10;$*\n" | bc --mathlib | tr -d '\\\n')";
+    #                       └─ default (when `--mathlib` is used) is 20
+    #
+    if [[ "$result" == *.* ]]; then
+        # improve the output for decimal numbers
+        printf "$result" |
+        sed -e 's/^\./0./'        `# add "0" for cases like ".5"` \
+            -e 's/^-\./-0./'      `# add "0" for cases like "-.5"`\
+            -e 's/0*$//;s/\.$//';  # remove trailing zeros
+    else
+        printf "$result";
+    fi;
+    printf "\n";
+}
+
+
+# 1- Create a new directory and enter it
+#---------------------------------------
+function mkd() {
+    mkdir -p "$@" && cd "$_" || exit;
+}
+
+
+# 1- Create a .tar.gz archive, using `zopfli`, `pigz` or `gzip` for compression
+#--------------------------------------------
+function targz() {
+    local tmpFile="${@%/}.tar";
+    tar -cvf "${tmpFile}" --exclude=".DS_Store" "${@}" || return 1;
+
+    size=$(
+        stat -f"%z" "${tmpFile}" 2> /dev/null; # OS X `stat`
+        stat -c"%s" "${tmpFile}" 2> /dev/null # GNU `stat`
+    );
+
+    local cmd="";
+    if (( size < 52428800 )) && hash zopfli 2> /dev/null; then
+        # the .tar file is smaller than 50 MB and Zopfli is available; use it
+        cmd="zopfli";
+    else
+        if hash pigz 2> /dev/null; then
+            cmd="pigz";
+        else
+            cmd="gzip";
+        fi;
+    fi;
+
+    echo "Compressing .tar using \`${cmd}\`…";
+    "${cmd}" -v "${tmpFile}" || return 1;
+    [ -f "${tmpFile}" ] && rm "${tmpFile}";
+    echo "${tmpFile}.gz created successfully.";
+}
+
+
+# 1- Determine size of a file or total size of a directory
+# Modified to avoid errors
+#---------------------------------------------------------
+function fs() {
+    if du -b /dev/null > /dev/null 2>&1; then
+        local arg=-sbh;
+    else
+        local arg=-sh;
+    fi
+    if [[ -n "$@" ]]; then
+        du $arg -- "$@" 2>/dev/null;
+    else
+        du $arg -- .[^.]* * 2>/dev/null;
+    fi;
+}
+
+# 1- Compare original and gzipped file size
+#--------------------------------------------
+function gz() {
+    local origsize
+    local gzipsize
+    local ratio
+    origsize=$(wc -c < "$1");
+    gzipsize=$(gzip -c "$1" | wc -c);
+    ratio=$(echo "$gzipsize * 100 / $origsize" | bc -l);
+
+    printf "orig: %d bytes\n" "$origsize";
+    printf "gzip: %d bytes (%2.2f%%)\n" "$gzipsize" "$ratio";
+}
+
+
+# 1- Run `dig` and display the most useful info
+#----------------------------------------------
+function digga() {
+    dig +nocmd "$1" any +multiline +noall +answer;
+}
+
+# 1- `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
+# the `.git` directory, listing directories first. The output gets piped into
+# `less` with options to preserve color and line numbers, unless the output is
+# small enough for one screen.
+#---------------------------------------------------------------------------------
+function tre() {
+    tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
+}
+
+
+# Extract archives - use: extract <file>
+# Based on http://dotfiles.org/~pseup/.bashrc
+#--------------------------------------------
+function extract() {
+    if [ -f "$1" ] ; then
+        local filename, foldername, fullpath, didfolderexist
+        filename=$(basename "$1")
+        foldername="${filename%%.*}"
+        fullpath=$(perl -e 'use Cwd "abs_path";print abs_path(shift)' "$1")
+        didfolderexist=false
+        if [ -d "$foldername" ]; then
+            didfolderexist=true
+            read -p -r "$foldername already exists, do you want to overwrite it? (y/n) " -n 1
+            echo
+            if [[ $REPLY =~ ^[Nn]$ ]]; then
+                return
+            fi
+        fi
+        mkdir -p "$foldername" && cd "$foldername" || exit
+        case $1 in
+            *.tar.bz2) tar xjf "$fullpath" ;;
+            *.tar.gz) tar xzf "$fullpath" ;;
+            *.tar.xz) tar Jxvf "$fullpath" ;;
+            *.tar.Z) tar xzf "$fullpath" ;;
+            *.tar) tar xf "$fullpath" ;;
+            *.taz) tar xzf "$fullpath" ;;
+            *.tb2) tar xjf "$fullpath" ;;
+            *.tbz) tar xjf "$fullpath" ;;
+            *.tbz2) tar xjf "$fullpath" ;;
+            *.tgz) tar xzf "$fullpath" ;;
+            *.txz) tar Jxvf "$fullpath" ;;
+            *.zip) unzip "$fullpath" ;;
+            *) echo "'$1' cannot be extracted via extract()" && cd .. && ! $didfolderexist && rm -r "$foldername" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+
+# find a file with a given string pattern
+#----------------------------------------
+function ff() { find . -readable -type f -iname '*'"$*"'*' -print 2>/dev/null ; }
+
+
+# Which Python is currently active?
+#----------------------------------
+function wpy() {
+  which python | head -n 1
+}
+
+
+# use Anaconda Python environment in the current shell (conda up)
+# Also set gcc to version 5+ for PyCuda and friends, only for this shell.
+# The default reverts back to gcc 6+.
+#------------------------------------------------------------------------
+function ccu() {
+  export OLDPATH=${PATH}
+  export PATH="/opt/cuda/bin:/opt/cuda/include:$HOME/anaconda3/bin${PATH:+:${PATH}}"
+  export LD_LIBRARY_PATH=/opt/cuda/lib64
+}
+
+
+# source py27 environment from Anaconda
+function py27() {
+  source activate py27
+}
+
+
+# go back to native Python environment without restarting Bash (conda down)
+function ccd() {
+  source deactivate         # deactivate any environments that were sourced
+  export PATH=${OLDPATH}
+  unset OLDPATH
+}
+
+
+function wine32env(){
+    export WINEARCH=win32
+    export WINEPREFIX=~/win32
+    export WINEDEBUG=-all
+}
+
+
+function wine64env(){
+    export WINEARCH=
+    export WINEPREFIX=~/.wine
+}
+
+
+function man() {
+  LESS_TERMCAP_md=$'\e[01;36m' \
+  LESS_TERMCAP_me=$'\e[0m' \
+  LESS_TERMCAP_se=$'\e[0m' \
+  LESS_TERMCAP_so=$'\e[40;48;5;32m' \
+  LESS_TERMCAP_ue=$'\e[01;37m' \
+  LESS_TERMCAP_us=$'\e[01;32m' \
+  command man "$@"
+}
+
+
+function fjl() {
+  sudo firejail --list;
+}
+
+
+function notes() {
+    cp "$HOME"/notes /tmp/notes-"$(date +%s)"
+    echo ""
+    yes | rm --force "$HOME"/bak/notes-bak || echo "no backup made" && \
+    yes | cp --force "$HOME"/notes "$HOME"/bak/notes-bak && cat "$HOME"/notes
+}
+
+
+
+# vim: ft=sh

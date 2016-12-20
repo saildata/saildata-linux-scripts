@@ -1,15 +1,36 @@
-#!/bin/sh
-# Usage:
-#           00-prestart-quickcheck
+#!/usr/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# Checkup before starting gdm
 #
-# DESC: Checkup before starting gdm
+# Usage: setmonitor-resolution-4k
 
-kernel_start_time=$(bc <<< "scale=10; $(systemd-analyze | cut -d' ' -f10 | cut -d's' -f1) * 1000")
-userspace_start_time=$(bc <<< "scale=10; $(systemd-analyze | cut -d' ' -f13 | cut -d's' -f1) * 1000")
-totaltime=$(bc <<< "scale=3; (( $kernel_start_time + $userspace_start_time )) / 1000")
 
-systemctl --failed |\
-       	test $(grep -c "0 loaded units listed") = 1 \
-	&& echo -e "\e[38;5;41mSystemctl OK\e[0m"\
-       	|| echo -e "\e[38;5;1mCheck systemctl\e[0m"
-  echo -e "Kernel + boot time: \e[38;5;41m$totaltime seconds\e[0m"
+GREEN=$(tput setaf 2)
+BLUE=$(tput setaf 4)
+RED=$(tput setaf 1)
+NORMAL=$(tput sgr0)
+
+
+# Use the systemd-analyze output to generate one float that represents boot time
+KERNEL_START_TIME="$(systemd-analyze | cut -d' ' -f10 | grep --color=never -o '[0-9]\.[0-9]*')"
+
+_USERSPACE_START_TIME="$(systemd-analyze | cut -d' ' -f13 | grep --color=never -o '[0-9]\.*[0-9]*')"
+
+USERSPACE_START_TIME="$(bc <<< "scale=3; $_USERSPACE_START_TIME / 1000")"
+
+TOTALTIME=$(bc <<< "scale=3; $KERNEL_START_TIME + $USERSPACE_START_TIME")
+
+
+function quick_check() {
+    systemctl --failed | \
+        test "$(grep -c "0 loaded units listed")" = 1 && echo -e "${GREEN}(SYSTM) Systemctl OK${NORMAL}" || \
+        echo -e "${RED}Check systemctl${NORMAL}"
+    systemctl --failed --user | \
+        test "$(grep -c "0 loaded units listed")" = 1 && echo -e "${GREEN}(USER) Systemctl OK${NORMAL}" || \
+        echo -e "${RED}Check systemctl${NORMAL}"
+    echo -e "Kernel + userspace: ${BLUE}$TOTALTIME seconds${NORMAL}"
+}
+quick_check

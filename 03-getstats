@@ -86,8 +86,4 @@ function get_arch_db_info(){
     echo -e "\n${normal}" | tr -s "[:space:]"
 }
 
-function pause(){
-  read -s -r -p "" -n 1 >& /dev/null;
-}
-
 get_gpu_stats; get_cpu_stats; get_inet_info; get_resolution; get_arch_db_info

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 #
 # 1- denotes sourced from https://raw.githubusercontent.com/mathiasbynens/dotfiles/master/.functions (1/31/16)
 # 2- re: 1-  (minor deviations/tweaks may exist)
@@ -185,19 +185,6 @@ function ccd() {
 }
 
 
-function wine32env(){
-    export WINEARCH=win32
-    export WINEPREFIX=~/win32
-    export WINEDEBUG=-all
-}
-
-
-function wine64env(){
-    export WINEARCH=
-    export WINEPREFIX=~/.wine
-}
-
-
 function man() {
   LESS_TERMCAP_md=$'\e[01;36m' \
   LESS_TERMCAP_me=$'\e[0m' \
@@ -207,20 +194,6 @@ function man() {
   LESS_TERMCAP_us=$'\e[01;32m' \
   command man "$@"
 }
-
-
-function fjl() {
-  sudo firejail --list;
-}
-
-
-function notes() {
-    cp "$HOME"/notes /tmp/notes-"$(date +%s)"
-    echo ""
-    yes | rm --force "$HOME"/bak/notes-bak || echo "no backup made" && \
-    yes | cp --force "$HOME"/notes "$HOME"/bak/notes-bak && cat "$HOME"/notes
-}
-
 
 
 # vim: ft=sh

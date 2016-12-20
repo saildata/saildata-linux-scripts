@@ -22,7 +22,8 @@ function pacup(){
 function repo_update() {
     pacup \
     && sudo -k \
-    && pacaur-up
+    && pacaur-up \
+    && sudo -k
 }
 
 repo_update

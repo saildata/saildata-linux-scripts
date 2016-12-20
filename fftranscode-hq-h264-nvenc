@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# See man ffmpeg for details or ffmpeg -h encoder=h264_nvenc
+
+INPUT="$1"
+OUTPUT="$2"
+
+
+ffmpeg -y -hwaccel cuvid -benchmark \
+           -vcodec h264_cuvid \
+           -i "$INPUT" \
+           -vcodec h264_nvenc \
+           -preset slow \
+           -pix_fmt cuda \
+           -b:v 5M \
+           -maxrate 20M \
+           -bufsize:v 20M -bf 4 -g 240 \
+           -tier high \
+           -b_adapt 0 \
+           -temporal-aq 1 \
+           -strict_gop 1 \
+           -qmin 0 \
+           -qmax 38 \
+           -acodec copy \
+           "$OUTPUT"

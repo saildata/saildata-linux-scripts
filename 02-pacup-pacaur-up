@@ -12,7 +12,7 @@ if (( $(id -u) != 0 )); then
 fi
 
 function pacaur-up(){
-    pacaur -yku && echo '' 
+    pacaur -yku && echo ''
 }
 
 function pacup(){
@@ -20,10 +20,10 @@ function pacup(){
 }
 
 function repo_update() {
-    pacup \
+    sudo -k \
+    && pacup \
     && sudo -k \
     && pacaur-up \
     && sudo -k
 }
-
 repo_update

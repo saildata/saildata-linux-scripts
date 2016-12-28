@@ -3,34 +3,34 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Checkup before starting gdm
+# Quick check on boot time (see TODO) and any failed modules using systemctl (system and user)
 #
-# Usage: setmonitor-resolution-4k
-
+# Usage: 00-prestart-quickcheck
 
 GREEN=$(tput setaf 2)
 BLUE=$(tput setaf 4)
 RED=$(tput setaf 1)
 NORMAL=$(tput sgr0)
 
-
 # Use the systemd-analyze output to generate one float that represents boot time
-KERNEL_START_TIME="$(systemd-analyze | cut -d' ' -f10 | grep --color=never -o '[0-9]\.[0-9]*')"
+KERNEL_START_TIME="$(systemd-analyze | cut -d' ' -f10 | egrep --color=never -o '[0-9]\.?[0-9]*')"
+USERSPACE_START_TIME="$(systemd-analyze | cut -d' ' -f13 | egrep --color=never -o '[0-9]\.?[0-9]*')"
 
-_USERSPACE_START_TIME="$(systemd-analyze | cut -d' ' -f13 | grep --color=never -o '[0-9]\.*[0-9]*')"
-
-USERSPACE_START_TIME="$(bc <<< "scale=3; $_USERSPACE_START_TIME / 1000")"
+# TODO - logic for ms/sec in userspace start time
+# USERSPACE_START_TIME="$(bc <<< "scale=3; $_USERSPACE_START_TIME / 1000")"
 
 TOTALTIME=$(bc <<< "scale=3; $KERNEL_START_TIME + $USERSPACE_START_TIME")
 
 
 function quick_check() {
+    # systemctl checks for system and user
     systemctl --failed | \
-        test "$(grep -c "0 loaded units listed")" = 1 && echo -e "${GREEN}(SYSTM) Systemctl OK${NORMAL}" || \
+        test "$(grep -c "0 loaded units listed")" = 1 && echo -e "${GREEN}(SYSTEM) Systemctl OK${NORMAL}" || \
         echo -e "${RED}Check systemctl${NORMAL}"
     systemctl --failed --user | \
         test "$(grep -c "0 loaded units listed")" = 1 && echo -e "${GREEN}(USER) Systemctl OK${NORMAL}" || \
-        echo -e "${RED}Check systemctl${NORMAL}"
+        echo -e "${RED}Check systemctl (user)${NORMAL}"
+    # boot time in seconds
     echo -e "Kernel + userspace: ${BLUE}$TOTALTIME seconds${NORMAL}"
 }
 quick_check

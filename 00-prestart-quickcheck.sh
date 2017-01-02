@@ -20,9 +20,8 @@ USER_START_TIME=0
 # Test if we have seconds or (default) ms
 function test_user_time_unit {
     local unit_is_ms _USER_START_TIME
-    unit_is_ms=$(systemd-analyze | cut -d' ' -f13 | grep 'ms')
+    unit_is_ms=$(systemd-analyze | cut -d' ' -f13 | grep 'ms' || echo '')
     _USER_START_TIME="$(systemd-analyze | cut -d' ' -f13 | egrep --color=never -o '[0-9]+\.?[0-9]*')"
-
     # If the units are not ms (then seconds) and scale the result
     if [ -z "$unit_is_ms" ]
     then USER_START_TIME=$(bc <<< "scale=3; $_USER_START_TIME * 1000")

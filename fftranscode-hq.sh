@@ -6,18 +6,23 @@ IFS=$'\n\t'
 #
 # Usage fftranscode [-h] [-d <decoder_name>] [-e <encoder_name>] -i input_file -o output_file
 
-# TODO - read docs/ add options for output resolution
-
 DECODER=h264_cuvid
 ENCODER=hevc_nvenc
 INPUT=
 OUTPUT=
+WIDTH=1920
+HEIGHT=1080
 
 show_usage(){
 cat << EOF
-    Usage: "$(basename "$0")": [-h] [-d <decoder_name>] [-e <encoder_name>] -i input_file -o output_file
-        The default decoder is h264_cuvid
-        The default encoder is hevc_nvenc.
+    Usage: "$(basename "$0")": [-h] [-d <decoder_name>] [-e <encoder_name>] [-x width] [-y height] -i input_file -o output_file
+
+        [Default values]
+            Decoder - h264_cuvid
+            Encoder - hevc_nvenc
+            Width   - 1920
+            Height  - 1080
+
         For a list of decoders, use: ffmpeg -hide_banner -decoders | grep cuvid
         For a list of encoders, use: ffmpeg -hide_banner -encoders | grep nvenc
 EOF
@@ -27,21 +32,22 @@ main(){
     ffmpeg -hide_banner -y -hwaccel cuvid \
         -vcodec "$DECODER" \
         -i "$INPUT" \
+        -vf scale_npp="$WIDTH":"$HEIGHT" \
         -vcodec "$ENCODER" \
         -preset slow \
         -profile:v main10 \
-        -tier high \
+        -pix_fmt cuda \
         -rc vbr_2pass \
-        -rc-lookahead 120 \
+        -rc-lookahead 480 \
         -temporal-aq 1 \
         -strict_gop 1 \
         -qmin 0 \
-        -qmax 35 \
+        -qmax 28 \
         -acodec copy \
         "$OUTPUT"
 }
 
-while getopts ":hd:e:i:o:" opt; do
+while getopts ":hd:e:i:o:x:y:" opt; do
     case $opt in
         h)
             show_usage
@@ -58,6 +64,12 @@ while getopts ":hd:e:i:o:" opt; do
             ;;
         o)
             OUTPUT=$OPTARG
+            ;;
+        x)
+            WIDTH=$OPTARG
+            ;;
+        y)
+            HEIGHT=$OPTARG
             ;;
         \?)
             echo "invalid option -$OPTARG" >&2

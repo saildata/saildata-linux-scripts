@@ -7,7 +7,7 @@ IFS=$'\n\t'
 green=$(tput setaf 2)
 blue=$(tput setaf 4)
 aqua=$(tput setaf 6)
-purple=$(tput setaf 5) 
+purple=$(tput setaf 5)
 normal=$(tput sgr0)
 
 function get_gpu_stats() {
@@ -87,10 +87,6 @@ function get_arch_db_info(){
     printf "%s\t%s\n" "$_DB_STATUS_COL3" "$_DB_STATUS_COL6" | tr -s "[:space:]"
 
     echo -e "\n${normal}" | tr -s "[:space:]"
-}
-
-function pause(){
-  read -s -r -p "" -n 1 >& /dev/null;
 }
 
 get_gpu_stats; get_cpu_stats; get_inet_info; get_misc; get_arch_db_info

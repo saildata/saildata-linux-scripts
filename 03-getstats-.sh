@@ -7,6 +7,7 @@ IFS=$'\n\t'
 green=$(tput setaf 2)
 blue=$(tput setaf 4)
 aqua=$(tput setaf 6)
+purple=$(tput setaf 5) 
 normal=$(tput sgr0)
 
 function get_gpu_stats() {
@@ -15,7 +16,7 @@ function get_gpu_stats() {
     _GPU_FREQ3=$(nvidia-smi --query-gpu=clocks.mem --format=csv,noheader)
     _GPU_FREQ4=$(nvidia-smi --query-gpu=clocks.video --format=csv,noheader)
 
-    printf "\n%s\n\n" "${green}||---GPU-CORE-TEMP-----||---GPU-FREQUENCIES------------------------------||"
+    printf "\n%s\n\n" "${green}||---GPU-CORE-TEMP-----||---GPU-FREQUENCIES,-----------------------------||"
 
     _GPU_TEMP=$(nvidia-smi -q | grep -i "GPU Current Temp")
 
@@ -60,11 +61,13 @@ function get_inet_info(){
 
 }
 
-function get_resolution(){
-    printf "%s\n\n" "${blue}||---RES-&-DPI-------||------------------------------------------------||"
+function get_misc(){
+    printf "%s\n" "${purple}||---MISC------------||------------------------------------------------||"
 
-    _RESOLUTION=$( xdpyinfo | grep -B 2 resolution )
-    printf "%s\n"            "$_RESOLUTION"
+    _RESOLUTION=$( xdpyinfo | grep -B 1 dimensions | cut -d':' -f2- | tail -1)
+    _KBD_RPT=$(xset -q | egrep -o 'auto repeat delay:.*')
+    printf "%s"            "$_RESOLUTION" | awk '{ print $1,$2,$3,$4}'
+    printf " %s\t\n"          "$_KBD_RPT" | tr -s "[:space:]"
     echo -e "${normal}" | tr -s "[:space:]"
 }
 
@@ -86,4 +89,8 @@ function get_arch_db_info(){
     echo -e "\n${normal}" | tr -s "[:space:]"
 }
 
-get_gpu_stats; get_cpu_stats; get_inet_info; get_resolution; get_arch_db_info
+function pause(){
+  read -s -r -p "" -n 1 >& /dev/null;
+}
+
+get_gpu_stats; get_cpu_stats; get_inet_info; get_misc; get_arch_db_info

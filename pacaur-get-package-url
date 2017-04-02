@@ -1,0 +1,24 @@
+#!/usr/bin/bash
+#set -euo pipefail
+IFS=$'\n\t'
+
+# pacaur-get-package-url
+
+# Returns the project URL by parsing the pacaur (AUR) output (see https://github.com/rmarquis/pacaur)
+
+function script_usage(){
+cat << EOF
+    Usage: "$(basename "$0") official_package_name" 
+EOF
+}
+
+function get_project_url(){
+    if [ "$#" -eq "1" ]
+    then
+        sed '6q;d' <(pacaur-detail "${1}") | awk '{print $3}'
+    else
+        script_usage && exit 1
+    fi
+}
+
+get_project_url "$@"

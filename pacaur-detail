@@ -1,0 +1,24 @@
+#!/usr/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# pacaur-detail
+
+# Returns the main project summary (ie pacman -Si) for pacaur (AUR) output (see https://github.com/rmarquis/pacaur)
+
+function script_usage(){
+cat << EOF
+    Usage: "$(basename "$0") official_package_name" 
+EOF
+}
+
+function get_project_detail(){
+    if [ "$#" -eq 1 ]
+    then
+        pacaur -Si "${1}"
+    else
+        script_usage && exit 1
+    fi
+}
+
+get_project_detail "$@"

@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# Toggle mic capture
+
+toggle_mic() {
+    amixer -c 2 set Mic toggle | grep '\[on\]' 2>/dev/null
+}
+
+if toggle_mic; then
+    notify-send --urgency=low "Microphone ON" "Microphone is active 🎤"
+else
+    notify-send --urgency=low "Microphone OFF" "Microphone is not active ⛔"
+fi
+
+

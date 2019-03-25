@@ -1,0 +1,151 @@
+#!/usr/bin/bash
+set -euo pipefail
+IFS=$'\t'
+
+# Clear tmp on known files/dumps
+
+green=$(tput setaf 2)
+normal=$(tput sgr0)
+
+function main(){
+    if [[ -d /tmp/dumps/ ]]; then
+        rm -rf /tmp/dumps && echo -e "${green}OK: removed tmp/dumps${normal}"
+    fi
+
+    if [[ -d /tmp/npm-*  ]]; then
+        rm -rf /tmp/npm-* && echo -e "${green}OK: removed npm temp folders ${normal}"
+    fi
+
+    for npmfiles in /tmp/npm-*; do
+        [ -e "$npmfiles" ] && rm -rf "$npmfiles" && echo -e "${green}OK: removed npm files${normal}"
+    done
+
+    if [[ -d '/tmp/Mailspring Crashes/' ]]; then
+        rm -rf '/tmp/Mailspring Crashes' && echo -e "${green}OK: removed mailspring crashes${normal}"
+    fi
+
+    if [[ -d /tmp/MozillaMailnews/ ]]; then
+        rm -rf /tmp/MozillaMailnews && echo -e "${green}OK: removed Thunderbird tmp files${normal}"
+    fi
+
+    if [[ -e /tmp/DirtRally_ldd_log_missing.txt ]]; then
+        rm -rf /tmp/DirtRally_ldd_log_missing.txt && echo -e "${green}OK: removed DR txt file${normal}"
+    fi
+
+    if [[ -e ~/.pythonhist ]]; then
+        rm -f ~/.pythonhist && echo -e "${green}OK: removed python hist file${normal}"
+    fi
+
+    if [[ -e ~/.mupdf.history ]]; then
+        rm -f ~/.mupdf.history && echo -e "${green}OK: removed mupdf hist file${normal}"
+    fi
+
+    if [[ -e /tmp/gameoverlayui.log ]]; then
+        rm -rf "/tmp/gameoverlayui.log"  && echo -e "${green}OK: removed Game overlay log file${normal}"
+        rm -rf "/tmp/gameoverlayui.log.last"  && echo -e "${green}OK: removed Game overlay log file${normal}"
+    fi
+
+    if [[ -e /tmp/gameoverlayui.log ]]; then
+        rm -rf "/tmp/gameoverlayui.log"  && echo -e "${green}OK: removed Game overlay log file${normal}"
+        rm -rf "/tmp/gameoverlayui.log.last"  && echo -e "${green}OK: removed Game overlay log file${normal}"
+    fi
+
+    if [[ -d /tmp/hsperfdata_srw/ ]]; then
+        rm -rf /tmp/hsperfdata_srw && echo -e "${green}OK: removed /tmp/hsperfdata${normal}"
+    fi
+
+    if [[ -d '/tmp/Discord Crashes/' ]]; then
+        rm -rf '/tmp/Discord Crashes' && echo -e "${green}OK: removed discord crashes${normal}"
+    fi
+
+    if [[ -d '/tmp/makepkg/' ]]; then
+        rm -rf '/tmp/makepkg' && echo -e "${green}OK: removed makepkg${normal}"
+    fi
+
+    if [[ -e '/tmp/eac_log.txt' ]]; then
+        rm -f '/tmp/eac_log.txt' && echo -e "${green}OK: removed 7dtd log${normal}"
+    fi
+
+    if [[ -e '/home/srw/.elinks/globhist' ]]; then
+        rm -f '/home/srw/.elinks/globhist' && echo -e "${green}OK: removed elinks hist${normal}"
+    fi
+
+    if [[ -d '/tmp/firefox_srw/' ]]; then
+        rm -rf '/tmp/firefox_srw' && echo -e "${green}OK: removed ff tmp files${normal}"
+    fi
+
+    if [[ -d '/tmp/firefox-dev_srw/' ]]; then
+        rm -rf '/tmp/firefox-dev_srw' && echo -e "${green}OK: removed ff dev edition tmp files${normal}"
+    fi
+    
+    if [[ -d '/tmp/firefox-dev_srw_dev-edition-default/' ]]; then
+        rm -rf '/tmp/firefox-dev_srw_dev-edition-default' && echo -e "${green}OK: removed ff dev edition tmp files${normal}"
+    fi
+
+    if [[ -d '/tmp/MozillaMailnews/' ]]; then
+        rm -rf '/tmp/MozillaMailnews/' && echo -e "${green}OK: removed thunderbird tmp files${normal}"
+    fi
+
+    if [[ -d '/tmp/thunderbird_srw/' ]]; then
+        rm -rf '/tmp/thunderbird_srw/' && echo -e "${green}OK: removed thunderbird tmp files${normal}"
+    fi
+
+    if [[ -d '/tmp/tldr/' ]]; then
+        rm -rf '/tmp/tldr/' && echo -e "${green}OK: removed tldr tmp files${normal}"
+    fi
+
+    if [[ -d '/tmp/Atom Crashes/' ]]; then
+        rm -rf '/tmp/Atom Crashes/' && echo -e "${green}OK: removed Atom Crashes tmp files${normal}"
+    fi
+
+    if [[ -d '/tmp/mozilla_srw0/' ]]; then
+        rm -rf '/tmp/mozilla_srw0/' && echo -e "${green}OK: removed FF tmp folder${normal}"
+    fi
+
+    if [[ -e '/tmp/glances-srw.log' ]]; then
+        rm -f '/tmp/glances-srw.log' && echo -e "${green}OK: removed glances log${normal}"
+    fi
+
+    if [[ -d '/tmp/Brave Developers Crashes/' ]]; then
+        rm -rf '/tmp/Brave Developers Crashes/' && echo -e "${green}OK: removed Brave Crashes tmp files${normal}"
+    fi
+
+    if [[ -d '/home/srw/Desktop/Old Firefox Data' ]]; then
+        rm -rf '/home/srw/Desktop/Old Firefox Data' && echo -e "${green}OK: removed old ff data${normal}"
+    fi
+
+    for wtfiles in /tmp/winetricks.*; do
+        [ -e "$wtfiles" ] && rm -rf "$wtfiles" && echo -e "${green}OK: removed winetricks files${normal}"
+    done
+
+    for msfiles in /tmp/Mailspring*.log; do
+        [ -e "$msfiles" ] && rm -rf "$msfiles" && echo -e "${green}OK: removed mailspring files${normal}"
+    done
+
+    for ffsock_files in /tmp/cubeb-*; do
+        [ -e "$ffsock_files" ] && rm -f "$ffsock_files" && echo -e "${green}OK: removed ff sock files${normal}"
+    done
+
+    for winefiles in /tmp/.wine-1000; do
+        [ -e "$winefiles" ] && rm -rf "$winefiles" && echo -e "${green}OK: removed wine files${normal}"
+    done
+
+    for dbjunk in /tmp/sqlite*; do
+        [ -e "$dbjunk" ] && rm "$dbjunk" && echo -e "${green}OK: removed tmp sqlite files${normal}"
+    done
+
+    for files in /tmp/.org.chromium.Chromium.*; do
+        [ -e "$files" ] && rm -rf "$files" && echo -e "${green}OK: removed Chromium tmp files${normal}"
+    done
+
+    if [[ -e "$HOME/.config/mpv/logs" ]]; then
+        rm -f "$HOME/.config/mpv/logs" && echo -e "${green}OK: removed mpv logs${normal}"
+    fi
+
+    if [[ -h "$HOME/.steampath" ]]; then
+        rm -f "$HOME/.steampath" && rm -f "$HOME/.steampid" && echo -e "${green}OK: removed steampath /steampid jank${normal}"
+    fi
+
+}
+
+main

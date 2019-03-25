@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+# Usage:
+#           04-update-pacaman-mirrors
+#
+# DESC: Lazy wrapper around reflector mirror service
+
+function mirror-update(){
+  sudo reflector --country 'United States' --latest 20 --protocol https --completion-percent 100 --fastest 6 --save /etc/pacman.d/mirrorlist
+}
+
+mirror-update

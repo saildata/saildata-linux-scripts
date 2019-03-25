@@ -1,0 +1,36 @@
+#!/bin/bash
+# Reset the GNOME night light color
+
+set -euo pipefail
+IFS=$'\n\t'
+
+red=$(tput setaf 1)
+green=$(tput setaf 10)
+normal=$(tput sgr0)
+
+COLOR=${1:-}
+OLD_COLOR="$( gsettings get org.gnome.settings-daemon.plugins.color night-light-temperature | awk '{ print $2 }' )"
+
+check_args(){
+    if ! [ "$COLOR" -eq "$COLOR" ] 2>/dev/null || [ "$COLOR" -lt 3000 ] 2>/dev/null || [ "$COLOR" -gt 6500 ] 2>/dev/null
+    then
+        printf "%s\\n" "${red}✘ No color temp provided. (int) between 3000 - 6500${normal}"
+        printf "%s\\n" "Current value: $OLD_COLOR" 2>/dev/null
+        exit 1
+    fi
+}
+
+main(){
+    check_args
+
+    gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature "$COLOR"
+
+    local new="$( gsettings get org.gnome.settings-daemon.plugins.color night-light-temperature | awk '{ print $2 }' )"
+
+    printf "Old: %s\\n" "$OLD_COLOR"
+    printf "${green}New: %s\\n" "$new ✓${normal}"
+}
+
+main
+
+

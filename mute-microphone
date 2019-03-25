@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# Mute mic capture
+
+function mute_mic() {
+    amixer -c 0 set Mic nocap | grep -iE --color '\[(off|on)\]'
+}
+
+mute_mic

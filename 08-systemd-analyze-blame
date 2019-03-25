@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# Ultra lazy systemd-analyze wrapper (post boot quick check)
+
+systemd-analyze blame | head

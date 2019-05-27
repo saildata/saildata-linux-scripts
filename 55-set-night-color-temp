@@ -31,16 +31,16 @@ check_args(){
 
 main(){
     check_is_enabled
+
     check_args
 
     gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature "$COLOR"
 
-    local new="$( gsettings get org.gnome.settings-daemon.plugins.color night-light-temperature | awk '{ print $2 }' )"
+    local new
+    new="$( gsettings get org.gnome.settings-daemon.plugins.color night-light-temperature | awk '{ print $2 }' )"
 
     printf "Old: %s\\n" "$OLD_COLOR"
     printf "${green}New: %s\\n" "$new ✓${normal}"
 }
 
 main
-
-

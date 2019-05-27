@@ -1,5 +1,5 @@
 #!/bin/bash
-# Reset the GNOME night light color
+# Manage the GNOME night light color
 
 set -euo pipefail
 IFS=$'\n\t'

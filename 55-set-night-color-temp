@@ -10,6 +10,15 @@ normal=$(tput sgr0)
 
 COLOR=${1:-}
 OLD_COLOR="$( gsettings get org.gnome.settings-daemon.plugins.color night-light-temperature | awk '{ print $2 }' )"
+STATUS="$( gsettings get org.gnome.settings-daemon.plugins.color night-light-enabled )"
+
+check_is_enabled(){
+    if [ "$STATUS" = "false" ] 2>/dev/null
+    then
+        printf "%s\\n" "gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true"
+        exit 1
+    fi
+}
 
 check_args(){
     if ! [ "$COLOR" -eq "$COLOR" ] 2>/dev/null || [ "$COLOR" -lt 3000 ] 2>/dev/null || [ "$COLOR" -gt 6500 ] 2>/dev/null
@@ -21,6 +30,7 @@ check_args(){
 }
 
 main(){
+    check_is_enabled
     check_args
 
     gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature "$COLOR"

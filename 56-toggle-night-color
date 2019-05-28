@@ -1,0 +1,22 @@
+#!/bin/bash
+# Toggle GNOME night light color
+
+set -euo pipefail
+IFS=$'\n\t'
+
+toggle_night_light(){
+    status="$( gsettings get org.gnome.settings-daemon.plugins.color night-light-enabled )"
+
+    if [ "$status" = "false" ] 2>/dev/null
+    then
+        gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
+    else
+        gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled false
+    fi
+}
+
+main(){
+    toggle_night_light
+}
+
+main

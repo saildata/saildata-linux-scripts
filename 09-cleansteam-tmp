@@ -78,6 +78,10 @@ function main(){
         rm -rf '/tmp/firefox-dev_srw' && echo -e "${green}OK: removed ff dev edition tmp files${normal}"
     fi
     
+    if [[ -d '/tmp/firefox-dev/' ]]; then
+        rm -rf '/tmp/firefox-dev' && echo -e "${green}OK: removed ff dev edition tmp files${normal}"
+    fi
+    
     if [[ -d '/tmp/firefox-dev_srw_dev-edition-default/' ]]; then
         rm -rf '/tmp/firefox-dev_srw_dev-edition-default' && echo -e "${green}OK: removed ff dev edition tmp files${normal}"
     fi

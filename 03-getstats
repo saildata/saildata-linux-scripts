@@ -96,15 +96,18 @@ function get_arch_db_info(){
         "-----------------------------------------------||""${normal}"
 
     # Pacman health #
-    _DB_STATUS_CORE=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '3q;d' | awk '{print $6,$7,$8,$9}' )
-    _DB_STATUS_EXTRA=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '4q;d' | awk '{print $6,$7,$8,$9}' )
-    _DB_STATUS_COMMUNITY=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '2q;d' | awk '{print $6,$7,$8,$9}' )
-    _DB_STATUS_MULTILIB=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '5q;d' | awk '{print $6,$7,$8,$9}' )
-    _DB_STATUS_ARCHSTRIKE=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '1q;d' | awk '{print $6,$7,$8,$9}' )
+    _DB_STATUS_CORE=$( stat -c '%.16y' /var/lib/pacman/sync/core.db )
+    _DB_STATUS_EXTRA=$( stat -c '%.16y' /var/lib/pacman/sync/extra.db )
+    _DB_STATUS_COMMUNITY=$( stat -c '%.16y' /var/lib/pacman/sync/community.db )
+    _DB_STATUS_MULTILIB=$( stat -c '%.16y' /var/lib/pacman/sync/multilib.db )
+    _DB_STATUS_ARCHSTRIKE=$( stat -c '%.16y' /var/lib/pacman/sync/archstrike.db )
 
-    printf "%s\t%s\n" "$_DB_STATUS_CORE" "$_DB_STATUS_EXTRA" | tr -s "[:space:]"
-    printf "%s\t%s\n" "$_DB_STATUS_COMMUNITY" "$_DB_STATUS_MULTILIB" | tr -s "[:space:]"
-    printf "%s\t%s\n" "$_DB_STATUS_ARCHSTRIKE"
+    # format example
+    # core: {{date}} extra: {{date}}
+    printf "%s %s\t%s %s\n" ' core.db:       ' "$_DB_STATUS_CORE"      'extra.db:    ' "$_DB_STATUS_EXTRA"
+    printf "%s %s\t%s %s\n" ' community.db:  ' "$_DB_STATUS_COMMUNITY" 'multilib.db: ' "$_DB_STATUS_MULTILIB"
+    printf "%s %s\n"        ' archstrike.db: ' "$_DB_STATUS_ARCHSTRIKE"
+    #printf "%s\t%s\n" "$_DB_STATUS_COMMUNITY" "$_DB_STATUS_MULTILIB" | tr -s "[:space:]"
 
     echo ""
 

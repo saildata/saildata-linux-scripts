@@ -1,9 +1,18 @@
 #!/bin/bash
 
-cmd=$1
+# Pipe a comma delimited list of PIDs to ps_mem
 
-mem=`ps -eo %mem,cmd --sort=-%mem | grep -i $cmd | awk -F ' ' '{sum += $1} END {print sum}'`
-memtotal=`cat /proc/meminfo | grep MemTotal | awk '{print $2}'`
-memcmd=`awk 'BEGIN{printf "%.2f\n", (("'$mem'"*"'$memtotal'")/100000)}'`
+ps_mem -d -p "$(pgrep -d ',' -f "$1")"
 
-echo "${memcmd} Mb (${mem}%)"
+## thoughts
+## need to exclude this:
+#echo "exclude this: $BASHPID"
+# put query into BASH array
+
+#query=($(pgrep -d ',' -f "$1"))
+
+#echo "query is: ${query[@]}" 
+
+#possible=($( echo "${query[@]}" | sed "s|,$BASHPID||" ))
+
+#echo "possible is: $possible"

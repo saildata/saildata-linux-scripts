@@ -1,0 +1,114 @@
+#!/usr/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+#
+# Display CPU/GPU/Display/Wifi stats
+#
+
+clear
+
+gray_blue=$(tput setaf 255; tput setab 24)
+normal=$(tput sgr0)
+
+
+function get_gpu_stats() {
+    _GPU_FREQ1=$(nvidia-smi --query-gpu=clocks.gr --format=csv,noheader)
+    _GPU_FREQ2=$(nvidia-smi --query-gpu=clocks.sm --format=csv,noheader)
+    _GPU_FREQ3=$(nvidia-smi --query-gpu=clocks.mem --format=csv,noheader)
+    _GPU_FREQ4=$(nvidia-smi --query-gpu=clocks.video --format=csv,noheader)
+    printf "%s%s\n" "${gray_blue}||---GPU-CORE-TEMP-----||---GPU-FREQUENCIES--"\
+    "------------------------------------------------||${normal}"
+
+    _GPU_TEMP=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader)
+
+    printf '%s %-s\t %-s\n' "  GPU Current Temp:" "$_GPU_TEMP" "      GRAPHICS: $_GPU_FREQ1"
+    printf '\t\t\t\t %s\n'         "    SM: $_GPU_FREQ2"
+    printf '\t\t\t\t %s\n'         "MEMORY: $_GPU_FREQ3"
+    printf '\t\t\t\t %s\n'         " VIDEO: $_GPU_FREQ4 ${normal}"
+}
+
+function get_cpu_stats() {
+    _CPU_TEMP1=$( cut -c1-2 /sys/devices/platform/coretemp.0/hwmon/hwmon0/temp1_input )
+    _CPU_TEMP2=$( cut -c1-2 /sys/devices/platform/coretemp.0/hwmon/hwmon0/temp2_input )
+    _CPU_TEMP3=$( cut -c1-2 /sys/devices/platform/coretemp.0/hwmon/hwmon0/temp3_input )
+    _CPU_TEMP4=$( cut -c1-2 /sys/devices/platform/coretemp.0/hwmon/hwmon0/temp4_input )
+    _CPU_TEMP5=$( cut -c1-2 /sys/devices/platform/coretemp.0/hwmon/hwmon0/temp5_input )
+    _MB_TEMP=$( cut -c1-2 /sys/devices/platform/nct6775.656/hwmon/hwmon1/temp7_input )
+    
+    _CPU_FAN1_RPM=$(cut -c1-4 /sys/devices/platform/nct6775.656/hwmon/hwmon1/fan1_input )
+    _CHA_FAN1_RPM=$(cut -c1-4 /sys/devices/platform/nct6775.656/hwmon/hwmon1/fan2_input )
+    _CHA_FAN3_RPM=$(cut -c1-4 /sys/devices/platform/nct6775.656/hwmon/hwmon1/fan4_input )
+
+    _FIVEMIN_AVG=$( w | sed '1q;d' | cut -d',' -f3- | cut -d':' -f2 | cut -d',' -f1 )
+    _FIVEMIN_PCT_TMP1=$( bc <<< "scale=3; $_FIVEMIN_AVG*100")
+    _FIVEMIN_PCT=$( bc <<< "scale=3; $_FIVEMIN_PCT_TMP1/8")
+
+    _TENMIN_AVG=$( w | sed '1q;d' | cut -d',' -f3- | cut -d':' -f2 | cut -d',' -f2 )
+    _TENMIN_PCT_TMP1=$( bc <<< "scale=3; $_TENMIN_AVG*100")
+    _TENMIN_PCT=$( bc <<< "scale=3; $_TENMIN_PCT_TMP1/8")
+
+    _FIFTNMIN_AVG=$( w | sed '1q;d' | cut -d',' -f3- | cut -d':' -f2 | cut -d',' -f3 )
+    _FIFTNMIN_PCT_TMP1=$( bc <<< "scale=3; $_FIFTNMIN_AVG*100")
+    _FIFTNMIN_PCT=$( bc <<< "scale=3; $_FIFTNMIN_PCT_TMP1/8")
+
+    printf "%s%s\n" "${gray_blue}||---CPU-PHYS-TEMP-----||---"\
+        "-----------------------------------------------------------------||${normal}"
+    printf '%-s : %s°C\t\t%-s: %4s RPM\n'           "  MAIN   " "$_CPU_TEMP1" 'CPU FAN1' "$_CPU_FAN1_RPM"
+    printf '%-s : %s°C\t\t%-s: %4s RPM\n'    '  PCORE1 ' "$_CPU_TEMP2" 'CHA FAN1' "$_CHA_FAN1_RPM"
+    printf '%-s : %s°C\t\t%-s: %4s RPM\n'    '  PCORE2 ' "$_CPU_TEMP3" 'CHA FAN3' "$_CHA_FAN3_RPM"
+    printf '%-s : %s°C\n'    '  PCORE3 ' "$_CPU_TEMP4"
+    printf '%-s : %s°C\t\t%-s: %s°C\n'    '  PCORE4 ' "$_CPU_TEMP5" 'MB TEMP' "$_MB_TEMP"
+            #<-5 min------>|<-10min---->|<-15min------>|
+    printf '\n%-s:  %0.2f%s  %s:  %0.2f%s  %s:  %0.2f%s\n' "  5 MINAVG" "$_FIVEMIN_PCT" '%' '10 MINAVG' "$_TENMIN_PCT" '%' '15 MINAVG' "$_FIFTNMIN_PCT" '%                 '
+}
+
+function get_inet_info(){
+    printf "%s%s\n\n" "${gray_blue}||---INET-INFO-------||"\
+        "---------------------------------------------------------------||${normal}"
+
+    _INET=$( ifconfig | grep enp0s31f6 --after-context=6 --color=never )
+
+    echo -e "$_INET" | tr -s "[:space:]" | sed '1q;d' | cut -d ' ' -f 1- && echo "" || true
+
+}
+
+function get_misc(){
+    printf "%s%s\n" "${gray_blue}||---MISC--------------||---------------------"\
+        "-----------------------------------------------||${normal}"
+
+    #https://github.com/dylanaraps/neofetch
+
+    _RESOLUTION_INFO=$( xdpyinfo | grep -A 2 'screen #0' )
+    _DPI=$(printf "%s" "$_RESOLUTION_INFO" | sed '3q;d' | awk '{print $2 " dots per inch"}' )
+    _RESOLUTION="$(xrandr --nograb --current |\
+        awk 'match($0,/[0-9]*\.[0-9]*\*/) {printf $1 " @ "substr($0,RSTART,RLENGTH) "Hz "}')"
+    _KBD_RPT=$( xset -q | grep -E -o 'auto repeat delay:.*' | awk '{print $4,",",$7}' )
+
+    printf "%-24s\t%s\n" " Resolution: " "$_RESOLUTION"
+    printf "%-24s\t%s\n" " DPI: " "$_DPI"
+    printf "%-24s\t%s\n" " KBD RATE: " "$_KBD_RPT"
+
+}
+
+function get_arch_db_info(){
+    printf "%s%s\n" "${gray_blue}||---ARCH DB-----------||---------------------"\
+        "-----------------------------------------------||""${normal}"
+
+    # Pacman health #
+    _DB_STATUS_CORE=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '3q;d' | awk '{print $6,$7,$8,$9}' )
+    _DB_STATUS_EXTRA=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '4q;d' | awk '{print $6,$7,$8,$9}' )
+    _DB_STATUS_COMMUNITY=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '2q;d' | awk '{print $6,$7,$8,$9}' )
+    _DB_STATUS_MULTILIB=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '5q;d' | awk '{print $6,$7,$8,$9}' )
+    _DB_STATUS_ARCHSTRIKE=$( ls -Al /var/lib/pacman/sync/*.db | sort -k 9 | sed '1q;d' | awk '{print $6,$7,$8,$9}' )
+
+    printf "%s\t%s\n" "$_DB_STATUS_CORE" "$_DB_STATUS_EXTRA" | tr -s "[:space:]"
+    printf "%s\t%s\n" "$_DB_STATUS_COMMUNITY" "$_DB_STATUS_MULTILIB" | tr -s "[:space:]"
+    printf "%s\t%s\n" "$_DB_STATUS_ARCHSTRIKE"
+
+    echo ""
+
+}
+
+#get_gpu_stats; get_cpu_stats; #get_inet_info; get_misc; get_arch_db_info
+get_gpu_stats; get_cpu_stats; get_misc; get_arch_db_info

@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+# Return list of potential target types for content of clipboard
+
+xclip -t TARGETS -sel clip -o

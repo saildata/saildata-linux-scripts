@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# Switch analog outputs in pulseaudio
+# i.e. switch from speakers to headphones
+# see https://wiki.archlinux.org/index.php/PulseAudio#Script_for_switching_analog_outputs
+
+# wiki assumes that profiles are set.. here just use the active port
+# adjusted for second card
+CURRENT_PROFILE=$(pactl list sinks | grep 'Active Port' | cut -d' ' -f 3)
+
+if [ "$CURRENT_PROFILE" = "iec958-stereo-output" ] ; then
+	pactl set-card-profile alsa_card.pci-0000_00_1f.3 output:analog-stereo
+	notify-send --urgency=low "PulseAudio Output Changed" "Switched to PC Speakers 🔊"
+else
+	pactl set-card-profile alsa_card.pci-0000_00_1f.3 output:iec958-stereo
+	notify-send --urgency=low "PulseAudio Output Changed" "Switched to Surround Speakers 🔊"
+fi

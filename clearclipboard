@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+# Clear clipboard using xclip (bind using xbindkeys)
+
+#echo -n | xclip -display :1 -selection clipboard
+xsel -cb && xsel -cb
